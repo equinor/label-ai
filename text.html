@@ -19,6 +19,19 @@
     textarea {
       min-height: 150px;
     }
+    .ltr-marker::before {
+        content: "↱";
+        color: red;
+    }
+    .rtl-marker::after {
+        content: "↰";
+        color: red;
+    }
+    .tpm-space {
+    background-color: greenyellow;
+    display: inline-block;
+    width: 0.6em; /* Make it visible */
+  }
   </style>
 </head>
 <body>
@@ -41,66 +54,177 @@
       <textarea id="inputText" class="form-control"  rows="7" placeholder="Paste or type your text here..."></textarea>
     </div>
 
-    <div class="mb-3">
+    <!-- Added radio button group for transformation mode -->
+    <fieldset class="mb-3">
+      <legend>Choose transformation:</legend>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="transformMode" id="modeEverything" value="everything" checked>
+        <label class="form-check-label" for="modeEverything">Bookend everything</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="transformMode" id="modeParagraphs" value="paragraphs">
+        <label class="form-check-label" for="modeParagraphs">Bookend paragraphs</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="transformMode" id="modeSentences" value="sentences">
+        <label class="form-check-label" for="modeSentences">Bookend sentences</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="transformMode" id="modeWords" value="words">
+        <label class="form-check-label" for="modeWords">Prepend every word</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="transformMode" id="modeSpaces" value="spaces">
+        <label class="form-check-label" for="modeSpaces">Replace all spaces</label>
+      </div>
+    </fieldset>
+
+    <div class="d-flex gap-2 mb-4">
+      <button class="btn btn-primary flex-grow-1" id="processButton">Tag text & copy to clipboard</button>
+      <button class="btn btn-secondary" id="clearText">Clear</button>
+    </div>
+
+<!--    <div class="mb-3">
       <label for="transformedText" class="form-label">Tagged output:</label>
       <textarea id="transformedText" class="form-control"  rows="7" readonly></textarea>
     </div>
+-->
 
-    <div class="d-flex gap-2 mb-4">
-      <button class="btn btn-primary flex-grow-1" id="processButton">Label it!</button>
-      <button class="btn btn-secondary" id="clearText">Clear</button>
+    <div class="mb-3">
+    <label for="visualizedText" class="form-label">Visualized output:</label>
+    <div id="visualizedText" class="border rounded p-3 bg-light" style="white-space:pre-wrap;"></div>
     </div>
 
     <div class="footer">
       <hr />
-      &copy; 2025 Matt Hall, Equinor // <a href="https://gist.github.com/kwinkunks/844a2e4eb3666ae0e2e41e2ba99c5cc2">GitHub</a>
+      &copy; 2025 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
     </div>
   </div>
 
-    <script>
+  <script>
     const processButton = document.getElementById('processButton');
     const inputText = document.getElementById('inputText');
-    const outputText = document.getElementById('transformedText');
+    //const outputText = document.getElementById('transformedText');
     const clearButton = document.getElementById('clearText');
 
     document.addEventListener('paste', async (event) => {
-        event.preventDefault();  // prevent default paste behavior
-        let clipboardText = '';
+      event.preventDefault();  // prevent default paste behavior
+      let clipboardText = '';
 
-        // Try to get clipboard data from the event first
-        if (event.clipboardData && event.clipboardData.getData) {
-            clipboardText = event.clipboardData.getData('text/plain');
-        } else if (navigator.clipboard) {
-            // Fallback: get text directly from clipboard API (async)
-            try {
+      if (event.clipboardData && event.clipboardData.getData) {
+          clipboardText = event.clipboardData.getData('text/plain');
+      } else if (navigator.clipboard) {
+          try {
             clipboardText = await navigator.clipboard.readText();
-            } catch (err) {
+          } catch (err) {
             console.error('Failed to read clipboard contents: ', err);
-            }
-        }
+          }
+      }
 
-        inputText.value = clipboardText;
-        inputText.focus();
-
+      inputText.value = clipboardText;
+      inputText.focus();
     });
 
-    processButton.addEventListener('click', async () => {
-        const text = inputText.value;
-        const labeled = '\u200E' + text + '\u200F';
-        outputText.value = labeled;
+    function bookendEverything(text) {
+      return '\u200E' + text + '\u200F';
+    }
 
-        try {
+    function bookendParagraphs(text) {
+      // split by paragraphs (split on two or more line breaks)
+      const paragraphs = text.split(/\n{2,}/);
+      return paragraphs.map(p => '\u200E' + p + '\u200F').join('\n\n');
+    }
+
+    function bookendSentences(text) {
+    // Split into paragraphs on two or more newlines
+    const paragraphs = text.split(/\n{2,}/);
+
+    // For each paragraph, split into sentences and bookend each sentence
+    const processedParagraphs = paragraphs.map(paragraph => {
+        // Match sentences (keep punctuation)
+        const sentences = paragraph.match(/[^.!?]+[.!?]*/g) || [];
+
+        // Bookend each sentence with LTR + RTL marks
+        const bookendedSentences = sentences.map(s => '\u200E' + s.trim() + '\u200F');
+
+        // Join sentences with a space inside the paragraph
+        return bookendedSentences.join(' ');
+    });
+
+    // Join paragraphs back with two newlines
+    return processedParagraphs.join('\n\n');
+    }
+
+    function prependEveryWord(text) {
+      // Insert \u200E before every word character that starts a word.
+      return text.replace(/\b(?=\w)/g, '\u200E');
+    }
+
+    function replaceSpaces(text) {
+    // Replace plain spaces with three-per-em spaces.
+      return text.replace(/ /g, '\u2004');
+      const updatedText = text.replace(/ /g, '#');
+    }
+
+    processButton.addEventListener('click', async () => {
+      const text = inputText.value;
+      const mode = document.querySelector('input[name="transformMode"]:checked').value;
+      let labeled = '';
+
+    //   if (!text) {
+    //     outputText.value = '';
+    //     return;
+    //  }
+      if (!text) {
+        visualizedText.value = '';
+        return;
+      }
+
+      switch (mode) {
+        case 'everything':
+          labeled = bookendEverything(text);
+          break;
+        case 'paragraphs':
+          labeled = bookendParagraphs(text);
+          break;
+        case 'sentences':
+          labeled = bookendSentences(text);
+          break;
+        case 'words':
+          labeled = prependEveryWord(text);
+          break;
+        case 'spaces':
+          labeled = replaceSpaces(text);
+          break;
+      }
+
+      // outputText.value = labeled;
+
+      try {
         await navigator.clipboard.writeText(labeled);
         console.log('Copied to clipboard!');
-        } catch (err) {
+      } catch (err) {
         console.error('Failed to copy:', err);
+      }
+
+      const visualizedText = document.getElementById('visualizedText');
+        function visualizeMarkers(text) {
+        // Replace LTR and RTL markers with spans for red bullets
+        return text
+            .replace(/\u2004/g, '<span class="tpm-space">\u2004</span>')
+            .replace(/\u200E/g, '<span class="ltr-marker">\u200E</span>')
+            .replace(/\u200F/g, '<span class="rtl-marker">\u200F</span>');
         }
+
+visualizedText.innerHTML = visualizeMarkers(labeled);
+
     });
 
     clearButton.addEventListener('click', () => {
-        inputText.value = '';
-        outputText.value = '';
+      inputText.value = '';
+      visualizedText.value = '';
+      // outputText.value = '';
     });
-    </script>
+  </script>
 </body>
 </html>
