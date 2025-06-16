@@ -3,8 +3,7 @@ A tiny app for labeling AI-generated images
 
 You can run it right on your computer, or use [the deployed version](https://equinor.github.io/label-ai/).
 
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/1cb8fc82-2677-4dc3-8451-10e60fc7db0a" />
-
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/a8e2d70e-9ce7-4eb1-9146-5ab7e47e1e68" />
 
 ## Labeling images
 
