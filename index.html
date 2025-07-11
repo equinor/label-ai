@@ -6,59 +6,13 @@
   <title>Label AI</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🔺</text></svg>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-        padding: 20px;
-    }
-    .footer {
-        color: #dedede;
-    }
-    .form-label {
-      color: #0d6efd;
-      font-weight: bold;
-      font-size: 120%;
-    }
-    textarea::placeholder {
-      color: #cdcdcd !important;
-    }
-    input::placeholder {
-      color: #cdcdcd !important;
-    }
-    hr {
-        border-color: #dedede;
-    }
-    canvas {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    #manifest-summary {
-      padding: 10px;
-      font-size: 120%;
-
-    }
-    #imageFrame {
-        position: relative;
-        height: 500px;
-        background-color: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-    #imageFrame.dragover {
-        background-color: #eeeeff;
-        border-color: #0d6efd;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <div class="container"> <!-- Start page container -->
+
+    <!-- Heading and nav -->
     <h1 class="mb-4 text-center">🔺 Label AI</h1>
-    <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
         <a class="nav-link active" href="index.html">🖼 Images</a>
@@ -68,36 +22,30 @@
       </li>
     </ul>
 
+    <!-- Start image frame -->
+    <div id="imageFrame" class="border border-dashed border-3 rounded text-center p-5" style="position: relative; overflow: hidden;">
+      <div id="popoverContainer" style="position: absolute; top: 10px; right: 10px; z-index: 10;" class="d-none">
+        <cai-popover interactive>
+          <cai-indicator slot="trigger"></cai-indicator>
+          <div id="manifest-summary" slot="content" style="width: 300px">
+            <h4>Content Credentials</h4>
+            <p style="font-size:90%; color:#bcbcbc;">Issued by <span id="manifest-summary-issuer"></span> on <span id="manifest-summary-date"></span></p>
+            <hr />
+            <p><b>Title:</b> <span id="manifest-summary-title"></span></p>
+            <hr />
+            <p><b>Recorder:</b> <span id="manifest-summary-recorder"></span></p>
+            <hr />
+            <p><b>Content tag:</b> <span id="manifest-summary-content-tag"></span></p>
+          </div>
+        </cai-popover>
+      </div> 
+      <p id="placeholderText">
+        <label class="form-label">Drag an image, Ctrl-V to paste from the clipboard,<br /><a href="#" id="uploadImageLink">or click here to open an image file</a></label>
+      </p>
+      <canvas id="canvas" class="d-none"></canvas>
+    </div> <!-- End image frame -->
 
-    <p class="lead text-center">Place a label and prompt in the pixels of your image.</p>
-
-<div id="imageFrame" class="border border-dashed border-3 rounded text-center p-5" style="position: relative; overflow: hidden;">
-  <div id="popoverContainer" style="position: absolute; top: 10px; right: 10px; z-index: 10;" class="d-none">
-    <cai-popover interactive>
-      <cai-indicator slot="trigger"></cai-indicator>
-      <!-- <cai-manifest-summary-v2
-        style="width: 300px"
-        locale="en-US"
-        slot="content"
-      ></cai-manifest-summary-v2> -->
-        <div id="manifest-summary" slot="content" style="width: 300px">
-          <h4>Content Credentials</h4>
-          <p style="font-size:90%; color:#bcbcbc;">Issued by <span id="manifest-summary-issuer"></span> on <span id="manifest-summary-date"></span></p>
-    <hr />
-    <p><b>Title:</b> <span id="manifest-summary-title"></span></p>
-    <hr />
-    <p><b>Recorder:</b> <span id="manifest-summary-recorder"></span></p>
-    <hr />
-    <p><b>Content tag:</b> <span id="manifest-summary-content-tag"></span></p>
-  </div>
-    </cai-popover>
-  </div>
-
-  <p id="placeholderText" class="text-muted lead">
-    Drag an image, Ctrl-V to paste on from the clipboard,<br />or <a href="#" id="uploadImageLink">click here to open an image file</a>
-  </p>
-  <canvas id="canvas" class="d-none"></canvas>
-</div>
+    <!-- Start form -->
     <div class="d-flex flex-wrap">
       <div class="mb-4 flex-fill me-4">
         <label class="form-label">Add a label</label>
@@ -132,29 +80,43 @@
       </div>
     </div>
 
+    <!-- Big buttons -->
     <div class="d-flex gap-2 mb-4">
       <button id="labelButton" class="btn btn-primary flex-grow-1">Label image and copy to clipboard</button>
       <button id="clearButton" class="btn btn-danger flex-grow-2">Clear</button>
     </div>
 
-    <div class="mb-4">
-      <h4>How does it work?</h4>
-      <p>The labels are inserted into the image, they cannot be easily removed except by cropping.
-        The optional text is embedded in the alpha channel of the image using
-        <a href="https://en.wikipedia.org/wiki/Steganography">steganography</a>.
-        If present, <a href="https://contentcredentials.org/">Content Credentials</a> are detected
-        and made available via the <b>cr</b> logo in the image frame.
-      </p>
-    </div>
+    <div class="card"> <!-- Start card -->
+      <div class="card-header" id="how-collapse-heading">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#how-collapse" aria-expanded="true" aria-controls="how-collapse">
+            How does it work?
+          </button>
+        </h5>
+      </div>
+      <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
+        <div class="card-body">
+          The labels are inserted into the image, they cannot be easily removed except by cropping.
+          The optional text is embedded in the alpha channel of the image using
+          <a href="https://en.wikipedia.org/wiki/Steganography">steganography</a>.
+          If present, <a href="https://contentcredentials.org/">Content Credentials</a> are detected
+          and made available via the <b>cr</b> logo in the image frame.
+        </div>
+      </div>
+    </div> <!-- End card -->
 
     <div class="footer">
-        <hr />
-        &copy; 2025 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
-      </div>
-  </div>
+      <hr />
+      &copy; 2025 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
+    </div>
 
+  </div> <!-- End page container -->
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
     // Copyright 2025 Matt Hall, Equinor // MIT license
+    $('.collapse').collapse();
     const labelButton = document.getElementById('labelButton');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -166,10 +128,10 @@
     const popoverContainer = document.getElementById('popoverContainer');
     let image = new Image();
     let originalImageSrc = null; // Store the original image source
-const uploadImageLink = document.getElementById('uploadImageLink');
+    const uploadImageLink = document.getElementById('uploadImageLink');
 
-// Image upload click.
-uploadImageLink.addEventListener('click', (event) => {
+    // Image upload click.
+    uploadImageLink.addEventListener('click', (event) => {
         event.preventDefault(); // Stop the link from navigating
 
         const fileInput = document.createElement('input');
@@ -181,36 +143,36 @@ uploadImageLink.addEventListener('click', (event) => {
         fileInput.click();
     });
 
-// Initialize C2PA stuff.
-let c2paSdk;
-let generateVerifyUrl;
-let getManifestSummaryStore;
-document.addEventListener('DOMContentLoaded', async () => {
-  const version = '0.30.9';
-  const c2paLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa@${version}/+esm`;
-  const c2paWcLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa-wc/+esm`;
+    // Initialize C2PA stuff.
+    let c2paSdk;
+    let generateVerifyUrl;
+    let getManifestSummaryStore;
 
-  try {
-    // Import createC2pa and generateVerifyUrl from the c2pa library
-    const c2paModule = await import(c2paLibraryUrl);
-    generateVerifyUrl = c2paModule.generateVerifyUrl;
+    document.addEventListener('DOMContentLoaded', async () => {
+      const version = '0.30.9';
+      const c2paLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa@${version}/+esm`;
+      const c2paWcLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa-wc/+esm`;
 
-    // Import getManifestSummaryStore from the c2pa-wc library
-    const c2paWcModule = await import(c2paWcLibraryUrl);
-    getManifestSummaryStore = c2paWcModule.getManifestSummaryStore;
+      try {
+        // Import createC2pa and generateVerifyUrl from the c2pa library
+        const c2paModule = await import(c2paLibraryUrl);
+        generateVerifyUrl = c2paModule.generateVerifyUrl;
 
-    // Initialize c2paSdk
-    c2paSdk = await c2paModule.createC2pa({
-      wasmSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/assets/wasm/toolkit_bg.wasm`,
-      workerSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/c2pa.worker.min.js`,
+        // Import getManifestSummaryStore from the c2pa-wc library
+        const c2paWcModule = await import(c2paWcLibraryUrl);
+        getManifestSummaryStore = c2paWcModule.getManifestSummaryStore;
+
+        // Initialize c2paSdk
+        c2paSdk = await c2paModule.createC2pa({
+          wasmSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/assets/wasm/toolkit_bg.wasm`,
+          workerSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/c2pa.worker.min.js`,
+        });
+        console.log('C2PA SDK initialized successfully.');
+
+      } catch (err) {
+        console.error('Error initializing C2PA SDK or importing libraries:', err);
+      }
     });
-    console.log('C2PA SDK initialized successfully.');
-
-  } catch (err) {
-    console.error('Error initializing C2PA SDK or importing libraries:', err);
-  }
-});
-
 
     // Disable dropdown if not selected.
     labelOptions.forEach(option => {
@@ -223,26 +185,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Copy image to clipboard function.
     async function copyCanvasImageToClipboard(canvasElement) {
-  try {
-    // 1. Get the image data as a Blob from the canvas
-    const blob = await new Promise(resolve => canvasElement.toBlob(resolve, 'image/png'));
+      try {
+        // 1. Get the image data as a Blob from the canvas
+        const blob = await new Promise(resolve => canvasElement.toBlob(resolve, 'image/png'));
 
-    // 2. Create a ClipboardItem with the image Blob
-    const clipboardItem = new ClipboardItem({
-      [blob.type]: blob
-    });
+        // 2. Create a ClipboardItem with the image Blob
+        const clipboardItem = new ClipboardItem({
+          [blob.type]: blob
+        });
 
-    // 3. Write the ClipboardItem to the clipboard
-    await navigator.clipboard.write([clipboardItem]);
+        // 3. Write the ClipboardItem to the clipboard
+        await navigator.clipboard.write([clipboardItem]);
 
-    console.log('Image copied to clipboard!');
-  } catch (err) {
-    console.error('Failed to copy image:', err);
-  }
-}
+        console.log('Image copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy image:', err);
+      }
+    }
 
-    // Label It button
+    // Label It button.
     labelButton.addEventListener('click', () => {
     const selectedOption = Array.from(labelOptions).find(option => option.checked).value;
     const fontSize = canvas.width / 30;
@@ -289,6 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ctx.fillText(label, fontSize, canvas.height - fontSize);
     }
 
+    // Steganography.
     const secretText = document.getElementById('hiddenPrompt').value;
     if (secretText.length > 0) {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -310,14 +274,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bit = binary[i];
         data[alphaIndex] = (originalAlpha & 0b11111110) | parseInt(bit);
       }
-
       ctx.putImageData(imageData, 0, 0);
-    
     }
 
-      copyCanvasImageToClipboard(canvas);
-
-
+    // Always place image on clipboard.
+    copyCanvasImageToClipboard(canvas);
+  
     });
 
     // Clear button.
@@ -331,19 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // // Image loading options.
-    // // Click to upload...
-    // imageFrame.addEventListener('click', () => {
-    // const fileInput = document.createElement('input');
-    // fileInput.type = 'file';
-    // fileInput.accept = 'image/*';
-    // fileInput.onchange = (event) => {
-    //     loadImageFromFile(event.target.files[0]);
-    // };
-    // fileInput.click();
-    // });
-
-    // Drag-and-drop.
+    // Drag-and-drop option.
     imageFrame.addEventListener('dragover', (event) => {
     event.preventDefault();
     imageFrame.classList.add('dragover');
@@ -360,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     });
 
-    // Ctrl-V
+    // Ctrl-V option.
     document.addEventListener('paste', (event) => {
     const items = event.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -428,64 +378,64 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-
-function loadImageFromURL(url) {
-  const image = new Image();
-  image.onload = async () => {
-    
-    popoverContainer.classList.add('d-none');
-
-    // 1. Show canvas and hide placeholder.
-    placeholderText.classList.add('d-none');
-    canvas.classList.remove('d-none');
-    originalImageSrc = url; // Save original
-
-    // 2. Set canvas dimensions and draw image.
-    canvas.width = image.width;
-    canvas.height = image.height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    // 3. Position the cai-popover relative to the image.
-    const canvasRect = canvas.getBoundingClientRect();
-    const imageFrameRect = imageFrame.getBoundingClientRect();
-
-    // Calculate the top and right offset for the popover relative to the imageFrame.
-    // This positions the popover relative to the image itself, within the frame.
-    // Add some padding (e.g., 10px) from the image edges.
-    const popoverTop = canvasRect.top - imageFrameRect.top + 10;
-    const popoverRight = imageFrameRect.right - canvasRect.right + 10;
-
-    popoverContainer.style.top = `${popoverTop}px`;
-    popoverContainer.style.right = `${popoverRight}px`;
-
-    // Steganographic message.
-    decodeAlphaMessageFromCanvas();
-
-    // C2PA metadata, if available.
-    if (c2paSdk) { 
-      try {
-        const { manifestStore } = await c2paSdk.read(url);
-        popoverContainer.classList.remove('d-none');
-        const manifestSummary = getManifestSummaryStore(manifestStore);
-        console.log('manifestStore', manifestStore);
-        console.log('manifestSummaryStore', manifestSummary);
-        document.getElementById('manifest-summary-issuer').innerHTML = manifestStore.activeManifest?.signatureInfo?.issuer || 'N/A';
-document.getElementById('manifest-summary-date').innerHTML = manifestStore.activeManifest?.signatureInfo?.proof?.created || 'N/A';
-document.getElementById('manifest-summary-title').innerHTML = manifestStore.activeManifest?.title || 'N/A';
-document.getElementById('manifest-summary-recorder').innerHTML = manifestSummary?.recorder || 'N/A';
-document.getElementById('manifest-summary-content-tag').innerHTML = manifestSummary?.contentSummaryTag || 'N/A';
-      } catch (err) {
-        console.error('Error reading C2PA data from image:', err);
+    // Load image and read its C2PA data if present.
+    function loadImageFromURL(url) {
+      const image = new Image();
+      image.onload = async () => {
+        
+        // 0. Remove any popover.
         popoverContainer.classList.add('d-none');
-      }
-    } else {
-      console.warn('C2PA SDK not initialized. Cannot read C2PA data.');
-      popoverContainer.classList.add('d-none');
+
+        // 1. Show canvas and hide placeholder.
+        placeholderText.classList.add('d-none');
+        canvas.classList.remove('d-none');
+        originalImageSrc = url; // Save original
+
+        // 2. Set canvas dimensions and draw image.
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        // 3. Position the cai-popover relative to the image.
+        const canvasRect = canvas.getBoundingClientRect();
+        const imageFrameRect = imageFrame.getBoundingClientRect();
+
+        // Calculate the top and right offset for the popover relative to the imageFrame.
+        // Add some padding (e.g., 10px) from the image edges.
+        const popoverTop = canvasRect.top - imageFrameRect.top + 10;
+        const popoverRight = imageFrameRect.right - canvasRect.right + 10;
+        popoverContainer.style.top = `${popoverTop}px`;
+        popoverContainer.style.right = `${popoverRight}px`;
+
+        // Steganographic message.
+        decodeAlphaMessageFromCanvas();
+
+        // C2PA metadata, if available.
+        if (c2paSdk) { 
+          try {
+            const { manifestStore } = await c2paSdk.read(url);
+            popoverContainer.classList.remove('d-none');
+            const manifestSummary = getManifestSummaryStore(manifestStore);
+            console.log('manifestStore', manifestStore);
+            console.log('manifestSummaryStore', manifestSummary);
+            document.getElementById('manifest-summary-issuer').innerHTML = manifestStore.activeManifest?.signatureInfo?.issuer || 'N/A';
+            let date = manifestStore.activeManifest?.signatureInfo?.time || 'N/A';
+            document.getElementById('manifest-summary-date').innerHTML = date.split('T')[0]
+            document.getElementById('manifest-summary-title').innerHTML = manifestStore.activeManifest?.title || 'N/A';
+            document.getElementById('manifest-summary-recorder').innerHTML = manifestSummary?.recorder || 'N/A';
+            document.getElementById('manifest-summary-content-tag').innerHTML = manifestSummary?.contentSummaryTag || 'N/A';
+          } catch (err) {
+            console.error('Error reading C2PA data from image:', err);
+            popoverContainer.classList.add('d-none');
+          }
+        } else {
+          console.warn('C2PA SDK not initialized. Cannot read C2PA data.');
+          popoverContainer.classList.add('d-none');
+        }
+      };
+      image.src = url;
     }
-  };
-  image.src = url;
-}
     
 </script>
 </body>

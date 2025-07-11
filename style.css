@@ -1,0 +1,73 @@
+/* Common styles */
+body {
+    padding: 20px;
+}
+.card-header .btn-link {
+    text-decoration: none;
+    font-size: 105%;
+}
+.footer {
+    color: #dedede;
+}
+.footer a {
+    color: #dedede;
+}
+.footer a:hover {
+    color: #bcbcbc;
+}
+.form-label {
+  color: #0d6efd;
+  font-weight: bold;
+  font-size: 120%;
+}
+textarea::placeholder {
+  color: #cdcdcd !important;
+}
+input::placeholder {
+  color: #cdcdcd !important;
+}
+.input-group {
+  margin-bottom: 20px;
+}
+hr {
+    border-color: #989898;
+}
+
+/* Styles for text markup */
+.ltr-marker::before {
+    content: "↱";
+    color: red;
+}
+.rtl-marker::after {
+    content: "↰";
+    color: red;
+}
+.tpm-space {
+    background-color: greenyellow;
+    display: inline-block;
+    width: 0.6em;
+}
+
+/* Styles for image frame */
+canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+#manifest-summary {
+  padding: 10px;
+  font-size: 120%;
+}
+#imageFrame {
+    position: relative;
+    height: 500px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+#imageFrame.dragover {
+    background-color: #eeeeff;
+    border-color: #0d6efd;
+}

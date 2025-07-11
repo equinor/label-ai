@@ -6,49 +6,13 @@
   <title>Text Tool</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🔺</text></svg>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <style>
-    body {
-        padding: 20px;
-    }
-    .footer {
-        color: #dedede;
-    }
-    .form-label {
-      color: #0d6efd;
-      font-weight: bold;
-      font-size: 120%;
-    }
-    textarea::placeholder {
-      color: #cdcdcd !important;
-    }
-    input::placeholder {
-      color: #cdcdcd !important;
-    }
-    hr {
-        border-color: #dedede;
-    }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    .ltr-marker::before {
-        content: "↱";
-        color: red;
-    }
-    .rtl-marker::after {
-        content: "↰";
-        color: red;
-    }
-    .tpm-space {
-    background-color: greenyellow;
-    display: inline-block;
-    width: 0.6em; /* Make it visible */
-  }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <div class="container"> <!-- Start page container -->
+  
+    <!-- Top matter -->
     <h1 class="mb-4 text-center">🔺 Label AI</h1>
-    <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
         <a class="nav-link" href="index.html">🖼 Images</a>
@@ -58,15 +22,14 @@
       </li>
     </ul>
 
-
-    <p class="lead text-center">Place special characters at the start and end of a piece of text.</p>
-
+    <!-- Text entry -->
     <div class="mb-3">
+      <label class="form-label">Your text</label>
       <textarea id="inputText" class="form-control"  rows="7" placeholder="Paste or type your text here..."></textarea>
     </div>
 
     <!-- Radio button group for transformation mode -->
-      <label for="radioButtons" class="form-label">Choose transformation</label>
+      <label for="radioButtons" class="form-label">Choose a transformation</label>
     <fieldset id="radioButtons" class="mb-4">
       <div class="row"> <div class="col-6"> <div class="form-check">
             <input class="form-check-input" type="radio" name="transformMode" id="modeEverything" value="everything" checked>
@@ -97,29 +60,43 @@
       <button class="btn btn-secondary" id="clearText">Clear</button>
     </div>
 
+    <!-- Visualized output -->
     <div class="mb-4">
     <label for="visualizedText" class="form-label">Visualized output</label>
     <div id="visualizedText" class="border rounded p-3 bg-light" style="white-space:pre-wrap;"></div>
     </div>
 
-    <div class="mb-4">
-      <h4>How does it work?</h4>
-      <p>Non-printing, zero-width characters (specifically the Unicode U+200E LEFT-TO-RIGHT MARK
-        and U+200F RIGHT-TO-LEFT MARK characters) are inserted into the text. These are invisible,
-        although some editors/applications may purge them. In the case of <b>Prepend every word</b>,
-        only the LTR mark is used before each word. In the case of <b>Replace all spaces</b>,
-        the spaces are replaced with Unicode U+2005 FOUR-PER-EM SPACE.
-      </p>
-    </div>
-
+    <div class="card"> <!-- How? card -->
+      <div class="card-header" id="how-collapse-heading">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#how-collapse" aria-expanded="true" aria-controls="how-collapse">
+            How does it work?
+          </button>
+        </h5>
+      </div>
+      <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
+        <div class="card-body">
+          Non-printing, zero-width characters (specifically the Unicode U+200E LEFT-TO-RIGHT MARK
+          and U+200F RIGHT-TO-LEFT MARK characters) are inserted into the text. These are invisible,
+          although some editors/applications may purge them. In the case of <b>Prepend every word</b>,
+          only the LTR mark is used before each word. In the case of <b>Replace all spaces</b>,
+          the spaces are replaced with Unicode U+2005 FOUR-PER-EM SPACE.
+        </div>
+      </div>
+    </div> <!-- End card -->
 
     <div class="footer">
       <hr />
       &copy; 2025 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
     </div>
-  </div>
+  
+  </div> <!-- End page container -->
 
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
+    // Copyright 2025 Matt Hall, Equinor // MIT license
+    $('.collapse').collapse();
     const processButton = document.getElementById('processButton');
     const inputText = document.getElementById('inputText');
     //const outputText = document.getElementById('transformedText');
@@ -189,10 +166,6 @@
       const mode = document.querySelector('input[name="transformMode"]:checked').value;
       let labeled = '';
 
-    //   if (!text) {
-    //     outputText.value = '';
-    //     return;
-    //  }
       if (!text) {
         visualizedText.value = '';
         return;
@@ -234,7 +207,7 @@
             .replace(/\u200F/g, '<span class="rtl-marker">\u200F</span>');
         }
 
-visualizedText.innerHTML = visualizeMarkers(labeled);
+    visualizedText.innerHTML = visualizeMarkers(labeled);
 
     });
 
