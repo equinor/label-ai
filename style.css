@@ -54,6 +54,27 @@ hr {
     color: limegreen;
 }
 
+/* Self-dismissing "copied" confirmation toast */
+.copy-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: rgba(33, 37, 41, 0.572);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 95%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1080;
+}
+.copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 /* Styles for image frame */
 canvas {
     max-width: 100%;
