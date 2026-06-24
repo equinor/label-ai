@@ -47,6 +47,9 @@ hr {
     display: inline-block;
     width: 0.6em;
 }
+.footnote {
+    color: rgb(184, 48, 229);
+}
 
 /* Styles for image frame */
 canvas {

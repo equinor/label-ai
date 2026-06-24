@@ -24,40 +24,36 @@
 
     <!-- Text entry -->
     <div class="mb-3">
+      <button class="btn btn-secondary btn-sm float-end" id="dummyText">Use dummy text</button>
       <label class="form-label">Your text</label>
-      <textarea id="inputText" class="form-control"  rows="7" placeholder="Paste or type your text here..."></textarea>
+      <textarea id="inputText" class="form-control"  rows="9" placeholder="Paste or type your text here..."></textarea>
     </div>
 
-    <!-- Radio button group for transformation mode -->
-      <label for="radioButtons" class="form-label">Choose a transformation</label>
-    <fieldset id="radioButtons" class="mb-4">
-      <div class="row"> <div class="col-6"> <div class="form-check">
-            <input class="form-check-input" type="radio" name="transformMode" id="modeEverything" value="everything" checked>
-            <label class="form-check-label" for="modeEverything">Bookend everything</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="transformMode" id="modeParagraphs" value="paragraphs">
-            <label class="form-check-label" for="modeParagraphs">Bookend paragraphs</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="transformMode" id="modeSentences" value="sentences">
-            <label class="form-check-label" for="modeSentences">Bookend sentences</label>
-          </div>
-        </div>
-        <div class="col-6"> <div class="form-check">
-            <input class="form-check-input" type="radio" name="transformMode" id="modeWords" value="words">
-            <label class="form-check-label" for="modeWords">Prepend every word</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="transformMode" id="modeSpaces" value="spaces">
-            <label class="form-check-label" for="modeSpaces">Replace all spaces</label>
-          </div>
-        </div>
+    <!-- Checkbox group for transformations (combinable) -->
+      <label class="form-label">Choose transformations</label>
+    <fieldset id="transformOptions" class="mb-4">
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="optMarks" checked>
+        <label class="form-check-label" for="optMarks">Add zero-width marks</label>
+        <select class="form-select form-select-sm mt-1" id="marksMode" style="max-width: 22rem;">
+          <option value="everything" selected>Bookend everything</option>
+          <option value="paragraphs">Bookend paragraphs</option>
+          <option value="sentences">Bookend sentences</option>
+          <option value="words">Prepend every word</option>
+        </select>
+      </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="optSpaces">
+        <label class="form-check-label" for="optSpaces">Use special spaces</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="optFootnote">
+        <label class="form-check-label" for="optFootnote">Add footnote on copy</label>
       </div>
     </fieldset>
     <div class="d-flex gap-2 mb-4">
       <button class="btn btn-primary flex-grow-1" id="processButton">Tag text & copy to clipboard</button>
-      <button class="btn btn-secondary" id="clearText">Clear</button>
+      <button class="btn btn-danger flex-grow-2" id="clearText">Clear</button>
     </div>
 
     <!-- Visualized output -->
@@ -76,18 +72,21 @@
       </div>
       <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
         <div class="card-body">
-          Non-printing, zero-width characters (specifically the Unicode U+200E LEFT-TO-RIGHT MARK
-          and U+200F RIGHT-TO-LEFT MARK characters) are inserted into the text. These are invisible,
-          although some editors/applications may purge them. In the case of <b>Prepend every word</b>,
-          only the LTR mark is used before each word. In the case of <b>Replace all spaces</b>,
-          the spaces are replaced with Unicode U+2005 FOUR-PER-EM SPACE.
+          The options can be combined. <b>Add zero-width marks</b> inserts non-printing,
+          zero-width characters (specifically the Unicode U+200E LEFT-TO-RIGHT MARK
+          and U+200F RIGHT-TO-LEFT MARK characters) into the text. These are invisible,
+          although some editors/applications may purge them. With the <b>Prepend every word</b>
+          mode, only the LTR mark is used before each word. <b>Use special spaces</b> replaces
+          the spaces with Unicode U+2005 FOUR-PER-EM SPACE. <b>Add footnote on copy</b> is
+          different: instead of hidden characters, it appends a visible plain-text disclosure
+          line to the end of the copied text.
         </div>
       </div>
     </div> <!-- End card -->
 
     <div class="footer">
       <hr />
-      &copy; 2025 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
+      &copy; 2026 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
     </div>
   
   </div> <!-- End page container -->
@@ -95,12 +94,23 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    // Copyright 2025 Matt Hall, Equinor // MIT license
+    // Copyright 2026 Matt Hall, Equinor // MIT license
     $('.collapse').collapse();
     const processButton = document.getElementById('processButton');
     const inputText = document.getElementById('inputText');
     //const outputText = document.getElementById('transformedText');
     const clearButton = document.getElementById('clearText');
+    const dummyButton = document.getElementById('dummyText');
+
+    // Joseph Weizenbaum, "Computer Power and Human Reason: From Judgment to Calculation" (1976), p. 558.
+    const dummyText = `I don't say that systems such as I have mentioned are necessarily evil—only that they may be and, what is most important, that their inevitability cannot be accepted by individuals claiming autonomy, freedom, and dignity. The individual computer scientist can and must decide. The determination of what the impact of computers on society is to be is, at least in part, in their hands.
+
+[If] technology is a nightmare that appears to have its own inevitable logic, it is our nightmare. It is possible, given courage and insight, for humans to deny technology the prerogative to formulate human questions. It is possible to ask human questions and to find humane answers.`;
+
+    dummyButton.addEventListener('click', () => {
+      inputText.value = dummyText;
+      inputText.focus();
+    });
 
     document.addEventListener('paste', async (event) => {
       event.preventDefault();  // prevent default paste behavior
@@ -161,32 +171,59 @@
       const updatedText = text.replace(/ /g, '#');
     }
 
+    // The visible footnote line (em-dash separator + disclosure).
+    const FOOTNOTE = '\u2014\nThis text was produced with AI assistance.';
+
+    function addFootnote(text) {
+      // Append a visible, plain-text disclosure as a separated footnote line.
+      return text + '\n\n' + FOOTNOTE;
+    }
+
+    // Enable/disable the zero-width marks dropdown with its checkbox.
+    const optMarks = document.getElementById('optMarks');
+    const marksMode = document.getElementById('marksMode');
+    function syncMarksMode() {
+      marksMode.disabled = !optMarks.checked;
+    }
+    optMarks.addEventListener('change', syncMarksMode);
+    syncMarksMode();
+
     processButton.addEventListener('click', async () => {
       const text = inputText.value;
-      const mode = document.querySelector('input[name="transformMode"]:checked').value;
-      let labeled = '';
+      let labeled = text;
 
       if (!text) {
-        visualizedText.value = '';
+        document.getElementById('visualizedText').innerHTML = '';
         return;
       }
 
-      switch (mode) {
-        case 'everything':
-          labeled = bookendEverything(text);
-          break;
-        case 'paragraphs':
-          labeled = bookendParagraphs(text);
-          break;
-        case 'sentences':
-          labeled = bookendSentences(text);
-          break;
-        case 'words':
-          labeled = prependEveryWord(text);
-          break;
-        case 'spaces':
-          labeled = replaceSpaces(text);
-          break;
+      // Apply each selected transformation in turn. Marks first, then special
+      // spaces (so any spaces added by the marks step get converted too), then
+      // the footnote last so its text stays plain and readable.
+      if (optMarks.checked) {
+        switch (marksMode.value) {
+          case 'everything':
+            labeled = bookendEverything(labeled);
+            break;
+          case 'paragraphs':
+            labeled = bookendParagraphs(labeled);
+            break;
+          case 'sentences':
+            labeled = bookendSentences(labeled);
+            break;
+          case 'words':
+            labeled = prependEveryWord(labeled);
+            break;
+        }
+      }
+
+      if (document.getElementById('optSpaces').checked) {
+        labeled = replaceSpaces(labeled);
+      }
+
+      const footnoteAdded = document.getElementById('optFootnote').checked;
+      if (footnoteAdded) {
+        labeled = addFootnote(labeled);
       }
 
       // outputText.value = labeled;
@@ -207,7 +244,12 @@
             .replace(/\u200F/g, '<span class="rtl-marker">\u200F</span>');
         }
 
-    visualizedText.innerHTML = visualizeMarkers(labeled);
+    let visualized = visualizeMarkers(labeled);
+    if (footnoteAdded) {
+      // Colour the appended footnote purple in the visualized output.
+      visualized = visualized.replace(FOOTNOTE, '<span class="footnote">' + FOOTNOTE + '</span>');
+    }
+    visualizedText.innerHTML = visualized;
 
     });
 
