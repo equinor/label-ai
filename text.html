@@ -26,7 +26,7 @@
     <div class="mb-3">
       <button class="btn btn-secondary btn-sm float-end" id="dummyText">Use dummy text</button>
       <label class="form-label">Your text</label>
-      <textarea id="inputText" class="form-control"  rows="9" placeholder="Paste or type your text here..."></textarea>
+      <textarea id="inputText" class="form-control" rows="9" placeholder="Paste or type your text here..."></textarea>
     </div>
 
     <!-- Checkbox group for transformations (combinable) -->
@@ -46,6 +46,10 @@
         <input class="form-check-input" type="checkbox" id="optSpaces">
         <label class="form-check-label" for="optSpaces">Use special spaces</label>
       </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="optDashes">
+        <label class="form-check-label" for="optDashes">Replace dashes</label>
+      </div>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" id="optFootnote">
         <label class="form-check-label" for="optFootnote">Add footnote on copy</label>
@@ -53,7 +57,7 @@
     </fieldset>
     <div class="d-flex gap-2 mb-4">
       <button class="btn btn-primary flex-grow-1" id="processButton">Tag text & copy to clipboard</button>
-      <button class="btn btn-danger flex-grow-2" id="clearText">Clear</button>
+      <button class="btn btn-danger flex-grow-1" id="clearText">Clear</button>
     </div>
 
     <!-- Visualized output -->
@@ -73,11 +77,11 @@
       <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
         <div class="card-body">
           The options can be combined. <b>Add zero-width marks</b> inserts non-printing,
-          zero-width characters (specifically the Unicode U+200E LEFT-TO-RIGHT MARK
-          and U+200F RIGHT-TO-LEFT MARK characters) into the text. These are invisible,
+          zero-width characters (specifically the Unicode <code>U+200E LEFT-TO-RIGHT MARK</code>
+          and <code>U+200F RIGHT-TO-LEFT MARK</code> characters) into the text. These are invisible,
           although some editors/applications may purge them. With the <b>Prepend every word</b>
           mode, only the LTR mark is used before each word. <b>Use special spaces</b> replaces
-          the spaces with Unicode U+2005 FOUR-PER-EM SPACE. <b>Add footnote on copy</b> is
+          the spaces with <code>U+2005 FOUR-PER-EM SPACE</code>. <b>Replace dashes</b> replaces <code>U+002D HYPHEN-MINUS</code> with <code>U+2010 HYPHEN</code> and <code>U+2014 EM DASH</code> with <code>U+2015 HORIZONTAL BAR</code>. <b>Add footnote on copy</b> is
           different: instead of hidden characters, it appends a visible plain-text disclosure
           line to the end of the copied text.
         </div>
@@ -93,171 +97,6 @@
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script>
-    // Copyright 2026 Matt Hall, Equinor // MIT license
-    $('.collapse').collapse();
-    const processButton = document.getElementById('processButton');
-    const inputText = document.getElementById('inputText');
-    //const outputText = document.getElementById('transformedText');
-    const clearButton = document.getElementById('clearText');
-    const dummyButton = document.getElementById('dummyText');
-
-    // Joseph Weizenbaum, "Computer Power and Human Reason: From Judgment to Calculation" (1976), p. 558.
-    const dummyText = `I don't say that systems such as I have mentioned are necessarily evil—only that they may be and, what is most important, that their inevitability cannot be accepted by individuals claiming autonomy, freedom, and dignity. The individual computer scientist can and must decide. The determination of what the impact of computers on society is to be is, at least in part, in their hands.
-
-[If] technology is a nightmare that appears to have its own inevitable logic, it is our nightmare. It is possible, given courage and insight, for humans to deny technology the prerogative to formulate human questions. It is possible to ask human questions and to find humane answers.`;
-
-    dummyButton.addEventListener('click', () => {
-      inputText.value = dummyText;
-      inputText.focus();
-    });
-
-    document.addEventListener('paste', async (event) => {
-      event.preventDefault();  // prevent default paste behavior
-      let clipboardText = '';
-
-      if (event.clipboardData && event.clipboardData.getData) {
-          clipboardText = event.clipboardData.getData('text/plain');
-      } else if (navigator.clipboard) {
-          try {
-            clipboardText = await navigator.clipboard.readText();
-          } catch (err) {
-            console.error('Failed to read clipboard contents: ', err);
-          }
-      }
-
-      inputText.value = clipboardText;
-      inputText.focus();
-    });
-
-    function bookendEverything(text) {
-      return '\u200E' + text + '\u200F';
-    }
-
-    function bookendParagraphs(text) {
-      // split by paragraphs (split on two or more line breaks)
-      const paragraphs = text.split(/\n{2,}/);
-      return paragraphs.map(p => '\u200E' + p + '\u200F').join('\n\n');
-    }
-
-    function bookendSentences(text) {
-    // Split into paragraphs on two or more newlines
-    const paragraphs = text.split(/\n{2,}/);
-
-    // For each paragraph, split into sentences and bookend each sentence
-    const processedParagraphs = paragraphs.map(paragraph => {
-        // Match sentences (keep punctuation)
-        const sentences = paragraph.match(/[^.!?]+[.!?]*/g) || [];
-
-        // Bookend each sentence with LTR + RTL marks
-        const bookendedSentences = sentences.map(s => '\u200E' + s.trim() + '\u200F');
-
-        // Join sentences with a space inside the paragraph
-        return bookendedSentences.join(' ');
-    });
-
-    // Join paragraphs back with two newlines
-    return processedParagraphs.join('\n\n');
-    }
-
-    function prependEveryWord(text) {
-      // Insert \u200E before every word character that starts a word.
-      return text.replace(/\b(?=\w)/g, '\u200E');
-    }
-
-    function replaceSpaces(text) {
-    // Replace plain spaces with four-per-em spaces.
-      return text.replace(/ /g, '\u2005');
-      const updatedText = text.replace(/ /g, '#');
-    }
-
-    // The visible footnote line (em-dash separator + disclosure).
-    const FOOTNOTE = '\u2014\nThis text was produced with AI assistance.';
-
-    function addFootnote(text) {
-      // Append a visible, plain-text disclosure as a separated footnote line.
-      return text + '\n\n' + FOOTNOTE;
-    }
-
-    // Enable/disable the zero-width marks dropdown with its checkbox.
-    const optMarks = document.getElementById('optMarks');
-    const marksMode = document.getElementById('marksMode');
-    function syncMarksMode() {
-      marksMode.disabled = !optMarks.checked;
-    }
-    optMarks.addEventListener('change', syncMarksMode);
-    syncMarksMode();
-
-    processButton.addEventListener('click', async () => {
-      const text = inputText.value;
-      let labeled = text;
-
-      if (!text) {
-        document.getElementById('visualizedText').innerHTML = '';
-        return;
-      }
-
-      // Apply each selected transformation in turn. Marks first, then special
-      // spaces (so any spaces added by the marks step get converted too), then
-      // the footnote last so its text stays plain and readable.
-      if (optMarks.checked) {
-        switch (marksMode.value) {
-          case 'everything':
-            labeled = bookendEverything(labeled);
-            break;
-          case 'paragraphs':
-            labeled = bookendParagraphs(labeled);
-            break;
-          case 'sentences':
-            labeled = bookendSentences(labeled);
-            break;
-          case 'words':
-            labeled = prependEveryWord(labeled);
-            break;
-        }
-      }
-
-      if (document.getElementById('optSpaces').checked) {
-        labeled = replaceSpaces(labeled);
-      }
-
-      const footnoteAdded = document.getElementById('optFootnote').checked;
-      if (footnoteAdded) {
-        labeled = addFootnote(labeled);
-      }
-
-      // outputText.value = labeled;
-
-      try {
-        await navigator.clipboard.writeText(labeled);
-        console.log('Copied to clipboard!');
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
-
-      const visualizedText = document.getElementById('visualizedText');
-        function visualizeMarkers(text) {
-        // Replace LTR and RTL markers with spans for red bullets
-        return text
-            .replace(/\u2005/g, '<span class="tpm-space">\u2005</span>')
-            .replace(/\u200E/g, '<span class="ltr-marker">\u200E</span>')
-            .replace(/\u200F/g, '<span class="rtl-marker">\u200F</span>');
-        }
-
-    let visualized = visualizeMarkers(labeled);
-    if (footnoteAdded) {
-      // Colour the appended footnote purple in the visualized output.
-      visualized = visualized.replace(FOOTNOTE, '<span class="footnote">' + FOOTNOTE + '</span>');
-    }
-    visualizedText.innerHTML = visualized;
-
-    });
-
-    clearButton.addEventListener('click', () => {
-      inputText.value = '';
-      visualizedText.value = '';
-      // outputText.value = '';
-    });
-  </script>
+  <script src="text.js"></script>
 </body>
 </html>
