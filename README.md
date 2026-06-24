@@ -9,7 +9,7 @@ You can download this repository and run it right on your computer, or use [the 
 
 ## Labeling images
 
-The image can be labeled in one or both of two different ways:
+The image can be labeled in one or more of two different ways:
 
 - A note or symbol can be embedded in the pixels of the image. This is visible to the viewer and cannot be removed except by cropping.
 - Text, such as a prompt, can be embedded in the pixels of the alpha channel of the image (optional). This is not visible to the viewer.
@@ -37,4 +37,4 @@ Also see the repo of the [Responsible AI team](https://github.com/equinor/respon
 
 ---
 
-&copy; 2024–2025 Equinor, AI Upskill | Licensed CC BY, please share this work.
+&copy; 2024–2026 Equinor, AI Upskill | Licensed CC BY, please share this work.
