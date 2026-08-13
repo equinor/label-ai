@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Attribution</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🔺</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container"> <!-- Start page container -->
+
+    <!-- Top matter -->
+    <h1 class="mb-4 text-center">🔺 Label AI</h1>
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">🖼 Label images</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="text.html">📝 Label text</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="attribution.html">ℹ Create attribution</a>
+      </li>
+    </ul>
+
+    <div class="row g-4"> <!-- Form + results, side by side on wide screens -->
+    <div class="col-lg-6">
+
+    <!-- Attribution form -->
+    <form id="attributionForm">
+
+      <!-- 1. Proportion of contribution -->
+      <fieldset class="mb-4">
+        <label class="form-label">1. How much of this work was created or assisted by AI?</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propEntirelyAi" value="entirely-ai">
+          <label class="form-check-label" for="propEntirelyAi">Entirely AI-generated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propPrimarilyAi" value="primarily-ai">
+          <label class="form-check-label" for="propPrimarilyAi">Primarily AI-generated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propBlend" value="blend">
+          <label class="form-check-label" for="propBlend">Human-AI blend</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propPrimarilyHuman" value="primarily-human">
+          <label class="form-check-label" for="propPrimarilyHuman">Primarily human-created</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propEntirelyHuman" value="entirely-human">
+          <label class="form-check-label" for="propEntirelyHuman">Entirely human-created</label>
+        </div>
+      </fieldset>
+
+      <!-- 2. AI contributions -->
+      <fieldset class="mb-4" id="sectionContribution">
+        <label class="form-label">2. AI contributions</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribSe" value="Se">
+          <label class="form-check-label" for="contribSe" title="AI was used to make stylistic edits, such as changes to structure, wording, and clarity.">Stylistic edits</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribCe" value="Ce">
+          <label class="form-check-label" for="contribCe" title="AI was used to make content edits, such as changes to scope, information, and ideas.">Content edits</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribNc" value="Nc">
+          <label class="form-check-label" for="contribNc" title="AI was used to make new content, such as text, images, analysis, and ideas.">New content</label>
+        </div>
+      </fieldset>
+
+      <!-- 3. Who initiated AI contributions -->
+      <fieldset class="mb-4" id="sectionInitiative">
+        <label class="form-label">3. Who initiated AI contributions?</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="initiative" id="initHin" value="Hin">
+          <label class="form-check-label" for="initHin" title="AI was prompted for its contributions, or AI assistance was enabled.">Human-initiated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="initiative" id="initAin" value="Ain">
+          <label class="form-check-label" for="initAin" title="The AI made proactive contributions, such as via auto-completion or unprompted changes.">AI-initiated</label>
+        </div>
+      </fieldset>
+
+      <!-- 4. Human review -->
+      <fieldset class="mb-4" id="sectionReview">
+        <label class="form-label">4. Human review</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="review" id="reviewYes" value="R">
+          <label class="form-check-label" for="reviewYes">AI-generated content was reviewed and approved</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="review" id="reviewNo" value="Nr">
+          <label class="form-check-label" for="reviewNo">AI generated content was not reviewed</label>
+        </div>
+      </fieldset>
+
+      <!-- 5. Model or application used -->
+      <div class="mb-4" id="sectionModel">
+        <label class="form-label" for="model">5. Model or application used</label>
+        <input class="form-control" type="text" id="model" name="model" placeholder="e.g. Microsoft Copilot, Claude Opus 5,...">
+      </div>
+
+    </form>
+
+    </div> <!-- End form column -->
+    <div class="col-lg-6">
+
+    <!-- Generated attribution -->
+    <div id="outputArea" class="attr-output border rounded p-3 bg-light mb-4">
+      <div id="emptyState">Fill out the form to get started.</div>
+      <div id="outputBody" class="d-none">
+
+        <div class="mb-3">
+          <label class="form-label">Full statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="fullStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyFull" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Abbreviated statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="abbrStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyAbbr" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Expanded statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="expandedStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyExpanded" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">Explanation</label>
+          <div id="explanationBlock"></div>
+        </div>
+
+      </div>
+    </div>
+
+    </div> <!-- End results column -->
+    </div> <!-- End form + results row -->
+
+    <div class="card"> <!-- How? card -->
+      <div class="card-header" id="how-collapse-heading">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#how-collapse" aria-expanded="true" aria-controls="how-collapse">
+            What is this?
+          </button>
+        </h5>
+      </div>
+      <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
+        <div class="card-body">
+          The form builds a machine- and human-readable attribution statement following IBM's 
+          <a href="https://aiattribution.github.io">AI Attribution</a> 1.0 specification. As you fill
+          out the form, the attribution statements update; the <b>full</b> and <b>abbreviated</b> statements link to
+          <code>aiattribution.github.io</code>, where they can be decoded. The
+          <b>expanded statement</b> is a plain-language summary, and the <b>Explanation</b> block is a
+          key to the abbreviations. Use the <b>Copy</b> buttons to copy a statement as plain text — the
+          link is preserved when you paste into applications that understand links.
+        </div>
+      </div>
+    </div> <!-- End card -->
+
+    <div class="footer">
+      <hr />
+      &copy; 2026 Matt Hall, Equinor // <a href="https://github.com/equinor/label-ai">GitHub</a>
+    </div>
+
+  </div> <!-- End page container -->
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="toast.js"></script>
+  <script src="attribution.js"></script>
+</body>
+</html>

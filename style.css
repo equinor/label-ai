@@ -75,6 +75,23 @@ hr {
     transform: translateX(-50%) translateY(0);
 }
 
+/* Styles for AI Attribution output */
+.attr-output a {
+    word-break: break-all;
+}
+.statement-box {
+    background-color: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+#expandedStatement {
+    font-style: italic;
+}
+.section-disabled {
+    opacity: 0.5;
+}
+
 /* Styles for image frame */
 canvas {
     max-width: 100%;
