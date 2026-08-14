@@ -1,109 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Label AI</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Attribution</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🔺</text></svg>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container"> <!-- Start page container -->
 
-    <!-- Heading and nav -->
+    <!-- Top matter -->
     <h1 class="mb-4 text-center">🔺 Label AI</h1>
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <a class="nav-link active" href="index.html">🖼 Label images</a>
+        <a class="nav-link active" href="index.html">ℹ Create attribution</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="images.html">🖼 Label images</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="sign.html">🛡️ Content Credentials</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="text.html">📝 Label text</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="attribution.html">ℹ Create attribution</a>
-      </li>
     </ul>
 
-    <!-- Start image frame -->
-    <div id="imageFrame" class="border border-dashed border-3 rounded text-center p-5" style="position: relative; overflow: hidden;">
-      <div id="popoverContainer" style="position: absolute; top: 10px; right: 10px; z-index: 10;" class="d-none">
-        <cai-popover interactive>
-          <cai-indicator slot="trigger"></cai-indicator>
-          <div id="manifest-summary" slot="content" style="width: 300px">
-            <h4>Content Credentials</h4>
-            <p style="font-size:90%; color:#bcbcbc;">Issued by <span id="manifest-summary-issuer"></span> on <span id="manifest-summary-date"></span></p>
-            <hr />
-            <p><b>Title:</b> <span id="manifest-summary-title"></span></p>
-            <hr />
-            <p><b>Recorder:</b> <span id="manifest-summary-recorder"></span></p>
-            <hr />
-            <p><b>Content tag:</b> <span id="manifest-summary-content-tag"></span></p>
+    <p class="mb-4">Create an AI Attribution for this work using <a href="https://research.ibm.com/blog/AI-attribution-toolkit">IBM's attribution format</a>.</p>
+    <hr />
+  
+    <div class="row g-4"> <!-- Form + results, side by side on wide screens -->
+    <div class="col-lg-6">
+
+    <!-- Attribution form -->
+    <form id="attributionForm">
+
+      <!-- 1. Proportion of contribution -->
+      <fieldset class="mb-4">
+        <label class="form-label">1. How much of this work was created or assisted by AI?</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propEntirelyAi" value="entirely-ai">
+          <label class="form-check-label" for="propEntirelyAi">Entirely AI-generated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propPrimarilyAi" value="primarily-ai">
+          <label class="form-check-label" for="propPrimarilyAi">Primarily AI-generated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propBlend" value="blend">
+          <label class="form-check-label" for="propBlend">Human-AI blend</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propPrimarilyHuman" value="primarily-human">
+          <label class="form-check-label" for="propPrimarilyHuman">Primarily human-created</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="proportion" id="propEntirelyHuman" value="entirely-human">
+          <label class="form-check-label" for="propEntirelyHuman">Entirely human-created</label>
+        </div>
+      </fieldset>
+
+      <!-- 2. AI contributions -->
+      <fieldset class="mb-4" id="sectionContribution">
+        <label class="form-label">2. AI contributions</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribSe" value="Se">
+          <label class="form-check-label" for="contribSe" title="AI was used to make stylistic edits, such as changes to structure, wording, and clarity.">Stylistic edits</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribCe" value="Ce">
+          <label class="form-check-label" for="contribCe" title="AI was used to make content edits, such as changes to scope, information, and ideas.">Content edits</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="contribution" id="contribNc" value="Nc">
+          <label class="form-check-label" for="contribNc" title="AI was used to make new content, such as text, images, analysis, and ideas.">New content</label>
+        </div>
+      </fieldset>
+
+      <!-- 3. Who initiated AI contributions -->
+      <fieldset class="mb-4" id="sectionInitiative">
+        <label class="form-label">3. Who initiated AI contributions?</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="initiative" id="initHin" value="Hin">
+          <label class="form-check-label" for="initHin" title="AI was prompted for its contributions, or AI assistance was enabled.">Human-initiated</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="initiative" id="initAin" value="Ain">
+          <label class="form-check-label" for="initAin" title="The AI made proactive contributions, such as via auto-completion or unprompted changes.">AI-initiated</label>
+        </div>
+      </fieldset>
+
+      <!-- 4. Human review -->
+      <fieldset class="mb-4" id="sectionReview">
+        <label class="form-label">4. Human review</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="review" id="reviewYes" value="R">
+          <label class="form-check-label" for="reviewYes">AI-generated content was reviewed and approved</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="review" id="reviewNo" value="Nr">
+          <label class="form-check-label" for="reviewNo">AI generated content was not reviewed</label>
+        </div>
+      </fieldset>
+
+      <!-- 5. Model or application used -->
+      <div class="mb-4" id="sectionModel">
+        <label class="form-label" for="model">5. Model or application used</label>
+        <input class="form-control" type="text" id="model" name="model" placeholder="e.g. Microsoft Copilot, Claude Opus 5,...">
+      </div>
+
+    </form>
+
+    </div> <!-- End form column -->
+    <div class="col-lg-6">
+
+    <!-- Generated attribution -->
+    <div id="outputArea" class="attr-output border rounded p-3 bg-light mb-4">
+      <div id="emptyState">Fill out the form to get started.</div>
+      <div id="outputBody" class="d-none">
+
+        <div class="mb-3">
+          <label class="form-label">Full statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="fullStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyFull" type="button">Copy</button>
           </div>
-        </cai-popover>
-      </div> 
-      <p id="placeholderText">
-        <label class="form-label">Drag an image, Ctrl-V to paste from the clipboard,<br /><a href="#" id="uploadImageLink">or click here to open an image file</a></label>
-      </p>
-      <canvas id="canvas" class="d-none"></canvas>
-    </div> <!-- End image frame -->
+        </div>
 
-    <!-- Start form -->
-    <div class="d-flex flex-wrap">
-      <div class="mb-4 flex-fill me-4">
-        <label class="form-label">Add a label</label>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="labelOption" id="generatedLabel" value="generated" checked>
-          <label class="form-check-label" for="generatedLabel">Generated by AI</label>
+        <div class="mb-3">
+          <label class="form-label">Abbreviated statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="abbrStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyAbbr" type="button">Copy</button>
+          </div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="labelOption" id="chooseModelLabel" value="model">
-          <label class="form-check-label" for="chooseModelLabel">Choose a model</label>
-          <select id="modelDropdown" class="form-select mt-2" disabled>
-            <option value="DALL-E">DALL-E</option>
-            <option value="Microsoft Copilot">Microsoft Copilot</option>
-            <option value="Midjourney">Midjourney</option>
-            <option value="Imagen">Imagen</option>
-          </select>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="labelOption" id="useAILabel" value="ai-label">
-          <label class="form-check-label" for="useAILabel">Use ai-label.org</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="labelOption" id="freeInputOption" value="free">
-          <label class="form-check-label" for="freeInputOption">Your own label</label>
-          <input class="form-control" type="text" id="freeInput" placeholder="Free text"/>
-        </div>
-      </div>
 
-      <div class="mb-4 flex-fill">
-        <label for="hiddenPrompt" class="form-label">Embed text (optional)</label>
-        <textarea id="hiddenPrompt" class="form-control" rows="7" placeholder="E.g. Model, version, date, prompt..."></textarea>
+        <div class="mb-3">
+          <label class="form-label">Expanded statement</label>
+          <div class="d-flex align-items-stretch gap-2">
+            <div id="expandedStatement" class="statement-box flex-grow-1"></div>
+            <button class="btn btn-outline-secondary btn-sm" id="copyExpanded" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">Explanation</label>
+          <div id="explanationBlock"></div>
+        </div>
+
       </div>
     </div>
 
-    <!-- Big buttons -->
-    <div class="d-flex gap-2 mb-4">
-      <button id="labelButton" class="btn btn-primary flex-grow-1">Label image and copy to clipboard</button>
-      <button id="clearButton" class="btn btn-danger" style="min-width: 8rem; max-width: 20vw;">Clear</button>
-    </div>
+    </div> <!-- End results column -->
+    </div> <!-- End form + results row -->
 
-    <div class="card"> <!-- Start card -->
+    <div class="card"> <!-- How? card -->
       <div class="card-header" id="how-collapse-heading">
         <h5 class="mb-0">
           <button class="btn btn-link" data-toggle="collapse" data-target="#how-collapse" aria-expanded="true" aria-controls="how-collapse">
-            How does it work?
+            What is this?
           </button>
         </h5>
       </div>
       <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
         <div class="card-body">
-          The labels are inserted into the image, they cannot be easily removed except by cropping.
-          The optional text is embedded in the alpha channel of the image using
-          <a href="https://en.wikipedia.org/wiki/Steganography">steganography</a>.
-          If present, <a href="https://contentcredentials.org/">Content Credentials</a> are detected
-          and made available via the <b>cr</b> logo in the image frame.
+          The form builds a machine- and human-readable attribution statement following IBM's 
+          <a href="https://aiattribution.github.io">AI Attribution</a> 1.0 specification. As you fill
+          out the form, the attribution statements update; the <b>full</b> and <b>abbreviated</b> statements link to
+          <code>aiattribution.github.io</code>, where they can be decoded. The
+          <b>expanded statement</b> is a plain-language summary, and the <b>Explanation</b> block is a
+          key to the abbreviations. Use the <b>Copy</b> buttons to copy a statement as plain text — the
+          link is preserved when you paste into applications that understand links.
         </div>
       </div>
     </div> <!-- End card -->
@@ -118,6 +187,6 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="toast.js"></script>
-  <script src="index.js"></script>
+  <script src="attribution.js"></script>
 </body>
 </html>
