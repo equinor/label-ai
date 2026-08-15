@@ -5,7 +5,7 @@
 // certificate (certs/cert.pem + certs/key.pem): the signature is cryptographically
 // valid but the signer is NOT on the C2PA trust list, so verifiers correctly show it
 // as an "unknown / untrusted source". The key is public by design and vouches for
-// nothing — see C2PA-UPSTREAM-NOTES.md for the details behind this implementation.
+// nothing.
 //
 // c2pa-web uses "direct COSE handling": the sign() callback is handed the claim bytes
 // and must return a complete COSE_Sign1 (with the signing cert as x5chain). We build
@@ -51,11 +51,17 @@ async function _buildCoseSign1(claimBytes) {
   return Uint8Array.from([0xD2, 0x84, ...protectedBstr, 0xA0, 0xF6, ..._cborBstr(rawSig)]);
 }
 
-// Lazily load the SDK + signing material on first use.
-async function _initC2paSign() {
+// Lazily load the c2pa-web SDK on first use (enough for reading/verifying).
+async function _initSdk() {
   if (_signSdk) return;
   const { createC2pa } = await import(C2PA_WEB_URL);
   _signSdk = await createC2pa();
+}
+
+// Additionally load the signing material (cert + key). Only needed for signing.
+async function _initSigner() {
+  await _initSdk();
+  if (_signerKey) return;
   const [certPem, keyPem] = await Promise.all([
     fetch('certs/cert.pem').then(r => r.text()),
     fetch('certs/key.pem').then(r => r.text()),
@@ -65,21 +71,50 @@ async function _initC2paSign() {
     'pkcs8', _pemToDer(keyPem), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
 }
 
-// Sign an image blob, embedding a C2PA manifest. `info` = { title?, attribution?, format? }.
-// `format` is the image MIME type (defaults to the blob's type, or image/png). Returns a new
-// Blob of the same format with the manifest embedded.
+const DEFAULT_DIGITAL_SOURCE_TYPE = 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia';
+
+// Sign an image blob, embedding a C2PA manifest. `info` = { title?, attribution?, format?,
+// digitalSourceType? }. If the asset ALREADY has a manifest, it is preserved as a parent
+// ingredient (a provenance chain, "update" intent) instead of being replaced; otherwise a new
+// "c2pa.created" manifest is written. Returns a new Blob of the same format.
 async function addContentCredentials(imageBlob, info = {}) {
-  await _initC2paSign();
+  await _initSigner();
   const format = info.format || imageBlob.type || 'image/png';
+
+  // Detect an existing manifest on the exact bytes we're about to sign (parse only, no verify).
+  let hasParent = false;
+  try {
+    const existing = await _signSdk.reader.fromBlob(format, imageBlob, {
+      verify: { verifyTrust: false, verifyAfterReading: false },
+    });
+    if (existing) { hasParent = true; await existing.free(); }
+  } catch (_) { /* unreadable → treat as no existing manifest */ }
+
   const builder = await _signSdk.builder.fromDefinition({
     claim_generator_info: [{ name: 'Label AI', version: '1.0.0' }],
     title: info.title || 'Signed by Label AI',
     format,
   });
-  await builder.addAction({
-    action: 'c2pa.created',
-    softwareAgent: { name: 'Label AI', version: '1.0.0' },
-  });
+
+  if (hasParent) {
+    // Adding credentials to an existing asset without altering its pixels = "update" intent.
+    // The builder retains the incoming manifest as the parent and auto-adds a c2pa.opened action.
+    await builder.setIntent('update');
+    await builder.addIngredientFromBlob(
+      { title: 'Original image', relationship: 'parentOf', label: 'parent' },
+      format,
+      imageBlob,
+    );
+  } else {
+    // New creation: C2PA 2.x requires a digitalSourceType on c2pa.created. Defaults to
+    // AI-generated (pairs with an AI attribution statement); override via info.digitalSourceType.
+    await builder.addAction({
+      action: 'c2pa.created',
+      softwareAgent: { name: 'Label AI', version: '1.0.0' },
+      digitalSourceType: info.digitalSourceType || DEFAULT_DIGITAL_SOURCE_TYPE,
+    });
+  }
+
   if (info.attribution) {
     await builder.addAssertion('com.equinor.label-ai', { attribution: info.attribution });
   }
@@ -96,18 +131,85 @@ async function addContentCredentials(imageBlob, info = {}) {
   return new Blob([signed], { type: format });
 }
 
-// Read back a signed blob's active manifest (trust verification off, so a self-signed
-// signer doesn't throw). Returns the active manifest object, or null if none.
-async function readContentCredentials(blob) {
-  await _initC2paSign();
+// C2PA trust list — CORS-open, fetched once and cached. When available, verification can
+// distinguish a recognised ("Trusted") signer from an unrecognised but otherwise-valid one.
+// Falls back to integrity-only if the list can't be fetched.
+//   - trustAnchors: the CURRENT official C2PA trust list (the CAI interim list was frozen
+//     2026-01-01, so it misses newer signers like Google — use conformance-public instead).
+//   - trustConfig: the CAI store's allowed-EKU config (small, stable).
+const TRUST_ANCHORS_URL = 'https://raw.githubusercontent.com/c2pa-org/conformance-public/main/trust-list/C2PA-TRUST-LIST.pem';
+const TRUST_CONFIG_URL = 'https://verify.contentauthenticity.org/trust/store.cfg';
+let _trust = null;
+let _trustTried = false;
+async function _getTrust() {
+  if (_trustTried) return _trust;
+  _trustTried = true;
+  try {
+    const [trustAnchors, trustConfig] = await Promise.all([
+      fetch(TRUST_ANCHORS_URL).then(r => r.text()),
+      fetch(TRUST_CONFIG_URL).then(r => r.text()),
+    ]);
+    _trust = { trustAnchors, trustConfig };
+  } catch (e) {
+    console.warn('C2PA trust list unavailable — falling back to integrity-only verify:', e);
+    _trust = null;
+  }
+  return _trust;
+}
+
+// Verify an image's Content Credentials. When the trust list is available this reports trust
+// too; otherwise it is integrity-only. Returns:
+//   { hasCredentials, validationState, trustChecked, successes, failures, manifest, issuer, title }
+//   - hasCredentials:false  -> no C2PA manifest present
+//   - validationState       -> "Trusted" | "Valid" | "Invalid"
+// A tampered asset comes back as validationState:"Invalid" (it does not throw).
+async function verifyContentCredentials(blob) {
+  await _initSdk();
   const format = blob.type || 'image/png';
-  const reader = await _signSdk.reader.fromBlob(format, blob, { verify: { verifyTrust: false } });
-  if (!reader) return null;
+  const trust = await _getTrust();
+  const withTrust = trust
+    ? { trust, verify: { verifyTrust: true, verifyAfterReading: true } }
+    : { verify: { verifyTrust: false, verifyAfterReading: true } };
+
+  let reader;
+  try {
+    reader = await _signSdk.reader.fromBlob(format, blob, withTrust);
+  } catch (e) {
+    // If a trust-enabled read failed, retry integrity-only before giving up.
+    if (trust) {
+      try {
+        reader = await _signSdk.reader.fromBlob(format, blob, { verify: { verifyTrust: false, verifyAfterReading: true } });
+      } catch (e2) {
+        return { hasCredentials: true, validationState: 'Invalid', trustChecked: false, error: e2?.message || String(e2) };
+      }
+      if (!reader) return { hasCredentials: false };
+      return await _readerVerdict(reader, false);
+    }
+    return { hasCredentials: true, validationState: 'Invalid', trustChecked: false, error: e?.message || String(e) };
+  }
+  if (!reader) return { hasCredentials: false };
+  return await _readerVerdict(reader, !!trust);
+}
+
+async function _readerVerdict(reader, trustChecked) {
+  const store = await reader.manifestStore();
   const manifest = await reader.activeManifest();
   await reader.free();
-  return manifest;
+  const results = store?.validation_results?.activeManifest;
+  const failures = results?.failure || (store?.validation_status || []).filter(s => s && s.success === false) || [];
+  const successes = results?.success || [];
+  return {
+    hasCredentials: true,
+    validationState: store?.validation_state || null,
+    trustChecked,
+    successes,
+    failures,
+    manifest,
+    issuer: manifest?.signature_info?.common_name || manifest?.signature_info?.issuer || null,
+    title: manifest?.title || null,
+  };
 }
 
 // Expose as globals for the page scripts (classic-script pattern, like toast.js).
 window.addContentCredentials = addContentCredentials;
-window.readContentCredentials = readContentCredentials;
+window.verifyContentCredentials = verifyContentCredentials;

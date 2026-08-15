@@ -8,7 +8,6 @@ const modelDropdown = document.getElementById('modelDropdown');
 const freeInput = document.getElementById('freeInput');
 const imageFrame = document.getElementById('imageFrame');
 const placeholderText = document.getElementById('placeholderText');
-const popoverContainer = document.getElementById('popoverContainer');
 let image = new Image();
 let originalImageSrc = null; // Store the original image source
 const uploadImageLink = document.getElementById('uploadImageLink');
@@ -24,37 +23,6 @@ uploadImageLink.addEventListener('click', (event) => {
         loadImageFromFile(e.target.files[0]);
     };
     fileInput.click();
-});
-
-// Initialize C2PA stuff.
-let c2paSdk;
-let generateVerifyUrl;
-let getManifestSummaryStore;
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const version = '0.30.9';
-  const c2paLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa@${version}/+esm`;
-  const c2paWcLibraryUrl = `https://cdn.jsdelivr.net/npm/c2pa-wc/+esm`;
-
-  try {
-    // Import createC2pa and generateVerifyUrl from the c2pa library
-    const c2paModule = await import(c2paLibraryUrl);
-    generateVerifyUrl = c2paModule.generateVerifyUrl;
-
-    // Import getManifestSummaryStore from the c2pa-wc library
-    const c2paWcModule = await import(c2paWcLibraryUrl);
-    getManifestSummaryStore = c2paWcModule.getManifestSummaryStore;
-
-    // Initialize c2paSdk
-    c2paSdk = await c2paModule.createC2pa({
-      wasmSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/assets/wasm/toolkit_bg.wasm`,
-      workerSrc: `https://cdn.jsdelivr.net/npm/c2pa@${version}/dist/c2pa.worker.min.js`,
-    });
-    console.log('C2PA SDK initialized successfully.');
-
-  } catch (err) {
-    console.error('Error initializing C2PA SDK or importing libraries:', err);
-  }
 });
 
 // Enable the model dropdown only when "Choose a model" is selected.
@@ -244,61 +212,23 @@ function decodeAlphaMessageFromCanvas() {
   }
 }
 
-// Load image and read its C2PA data if present.
+// Load image and draw it to the canvas.
 function loadImageFromURL(url) {
   const image = new Image();
-  image.onload = async () => {
-
-    // 0. Remove any popover.
-    popoverContainer.classList.add('d-none');
-
-    // 1. Show canvas and hide placeholder.
+  image.onload = () => {
+    // Show canvas and hide placeholder.
     placeholderText.classList.add('d-none');
     canvas.classList.remove('d-none');
     originalImageSrc = url; // Save original
 
-    // 2. Set canvas dimensions and draw image.
+    // Set canvas dimensions and draw image.
     canvas.width = image.width;
     canvas.height = image.height;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    // 3. Position the cai-popover relative to the image.
-    const canvasRect = canvas.getBoundingClientRect();
-    const imageFrameRect = imageFrame.getBoundingClientRect();
-
-    // Calculate the top and right offset for the popover relative to the imageFrame.
-    // Add some padding (e.g., 10px) from the image edges.
-    const popoverTop = canvasRect.top - imageFrameRect.top + 10;
-    const popoverRight = imageFrameRect.right - canvasRect.right + 10;
-    popoverContainer.style.top = `${popoverTop}px`;
-    popoverContainer.style.right = `${popoverRight}px`;
-
-    // Steganographic message.
+    // Preview any steganographic message.
     decodeAlphaMessageFromCanvas();
-
-    // C2PA metadata, if available.
-    if (c2paSdk) {
-      try {
-        const { manifestStore } = await c2paSdk.read(url);
-        popoverContainer.classList.remove('d-none');
-        const manifestSummary = getManifestSummaryStore(manifestStore);
-        console.log('manifestStore', manifestStore);
-        console.log('manifestSummaryStore', manifestSummary);
-        document.getElementById('manifest-summary-issuer').innerHTML = manifestStore.activeManifest?.signatureInfo?.issuer || 'N/A';
-        let date = manifestStore.activeManifest?.signatureInfo?.time || 'N/A';
-        document.getElementById('manifest-summary-date').innerHTML = date.split('T')[0];
-        document.getElementById('manifest-summary-title').innerHTML = manifestStore.activeManifest?.title || 'N/A';
-        document.getElementById('manifest-summary-recorder').innerHTML = manifestSummary?.recorder || 'N/A';
-        document.getElementById('manifest-summary-content-tag').innerHTML = manifestSummary?.contentSummaryTag || 'N/A';
-      } catch (err) {
-        console.error('Error reading C2PA data from image:', err);
-        popoverContainer.classList.add('d-none');
-      }
-    } else {
-      console.warn('C2PA SDK not initialized. Cannot read C2PA data.');
-      popoverContainer.classList.add('d-none');
-    }
   };
   image.src = url;
 }

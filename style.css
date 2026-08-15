@@ -16,7 +16,7 @@ body {
     color: #bcbcbc;
 }
 .form-label {
-    color: #0d6efd;
+    color: #1f4278;
     font-weight: bold;
     font-size: 120%;
 }
@@ -107,6 +107,42 @@ canvas {
     max-height: 460px;
     object-fit: contain;
 }
+/* Wrapper shrinks to the image so the badge can sit on the image itself */
+#previewWrap {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+/* On-image "Content Credentials present" mark, colour-coded by verdict */
+.cred-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    cursor: pointer;
+    border: none;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.cred-badge.state-trusted { background-color: #198754; }
+.cred-badge.state-warning { background-color: #fd7e14; }
+.cred-badge.state-invalid { background-color: #dc3545; }
+/* Credential details table (toggled by the badge) */
+.cred-panel { padding: 12px 16px; }
+.cred-panel table { width: 100%; font-size: 0.9rem; }
+.cred-panel th {
+    text-align: left;
+    vertical-align: top;
+    padding: 2px 10px 2px 0;
+    white-space: nowrap;
+    color: #555;
+    font-weight: 600;
+}
+.cred-panel td { vertical-align: top; padding: 2px 0; word-break: break-word; }
 #imageFrame {
     position: relative;
     height: 500px;

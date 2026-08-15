@@ -28,19 +28,40 @@
       </li>
     </ul>
 
-    <p class="mb-4">Add C2PA Content Credentials to an image, signed in your browser, and download the result.</p>
+    <p class="mb-4">Add <a href="https://c2pa.org/">C2PA Content Credentials</a> to an image, signed in your browser, and download the result.</p>
 
     <!-- Image frame -->
     <div id="imageFrame" class="border border-dashed border-3 rounded text-center p-5" style="position: relative; overflow: hidden;">
       <p id="placeholderText">
         <label class="form-label">Drag an image, Ctrl-V to paste from the clipboard,<br /><a href="#" id="uploadImageLink">or click here to open an image file</a></label>
       </p>
-      <img id="sourcePreview" class="d-none" alt="Image to sign">
+      <span id="previewWrap" class="d-none">
+        <img id="sourcePreview" alt="Image to sign">
+        <span id="credBadge" class="cred-badge d-none"></span>
+      </span>
+    </div>
+
+    <!-- Existing Content Credentials on the loaded image (if any) -->
+    <div id="existingCreds" class="alert d-none mb-4" role="status"></div>
+    <!-- Credential details table (shown when the loaded image has credentials) -->
+    <div id="credPanel" class="cred-panel card d-none mb-4"></div>
+
+    <!-- Digital source type -->
+    <div class="mb-4">
+      <label for="sourceTypeSelect" class="form-label">Add digital source type</label>
+      <select id="sourceTypeSelect" class="form-select">
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia" selected>AI-generated (trained algorithmic media)</option>
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia">Composite — AI combined with other content</option>
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/algorithmicallyEnhanced">Algorithmically enhanced</option>
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/minorHumanEdits">Human-created, with minor edits</option>
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/digitalCapture">Digital capture (camera or scan)</option>
+        <option value="http://cv.iptc.org/newscodes/digitalsourcetype/digitalArt">Digital art</option>
+      </select>
     </div>
 
     <!-- Attribution statement -->
     <div class="mb-4">
-      <label for="attributionInput" class="form-label">Attribution statement (optional)</label>
+      <label for="attributionInput" class="form-label">Add attribution statement (optional)</label>
       <textarea id="attributionInput" class="form-control" rows="2" placeholder="e.g. AIA Entirely AI v1.0"></textarea>
     </div>
 
@@ -62,14 +83,20 @@
       </div>
       <div id="how-collapse" class="collapse show" aria-labelledby="how-collapse-heading">
         <div class="card-body">
-          This adds <a href="https://contentcredentials.org/">Content Credentials</a> (a
-          <a href="https://c2pa.org/">C2PA</a> manifest) to your image. Drop in an image, add an
+          <p>This adds <a href="https://contentcredentials.org/">Content Credentials</a> (a
+          <a href="https://c2pa.org/">C2PA</a> manifest) to your image. When you load an image, any
+          existing Content Credentials are checked against the C2PA trust list and shown, with the
+          full details. Choose a <b>digital source type</b>, add an
           optional attribution statement, then <b>Sign and download image</b> signs it in your
           browser and downloads the result in one step — the attribution statement is embedded
-          in the manifest. Signing uses a <i>self-signed</i> certificate, so the credentials are
+          in the manifest. If the image already has Content Credentials, they are preserved as a
+          parent in the new manifest (a provenance chain) rather than replaced.
+          Signing uses a <i>self-signed</i> certificate, so the credentials are
           cryptographically valid and viewable, but verifiers (e.g. contentcredentials.org) will
           show the signer as an <b>unknown / untrusted source</b>. JPEG and PNG keep their
-          format; other formats are converted to PNG.
+          format; other formats are converted to PNG.</p>
+
+          <p>Note that there are criticisms of C2PA, and it is not a perfect solution for reliable attribution. See <a href="https://www.hackerfactor.com/blog/index.php?%2Farchives%2F1010-C2PAs-Butterfly-Effect.html">this article</a> for a thorough look at the issues.</p>
         </div>
       </div>
     </div> <!-- End card -->
