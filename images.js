@@ -5,6 +5,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const labelOptions = document.getElementsByName('labelOption');
 const modelDropdown = document.getElementById('modelDropdown');
+const aiLabelDropdown = document.getElementById('aiLabelDropdown');
 const freeInput = document.getElementById('freeInput');
 const imageFrame = document.getElementById('imageFrame');
 const placeholderText = document.getElementById('placeholderText');
@@ -25,10 +26,12 @@ uploadImageLink.addEventListener('click', (event) => {
     fileInput.click();
 });
 
-// Enable the model dropdown only when "Choose a model" is selected.
+// Enable the dropdown that belongs to the selected label option.
 labelOptions.forEach(option => {
   option.addEventListener('change', () => {
-    modelDropdown.disabled = option.value !== 'model';
+    const value = Array.from(labelOptions).find(o => o.checked).value;
+    modelDropdown.disabled = value !== 'model';
+    aiLabelDropdown.disabled = value !== 'ai-label';
   });
 });
 
@@ -53,22 +56,32 @@ async function copyCanvasImageToClipboard(canvasElement) {
   }
 }
 
+// Draw the chosen ai-label.org banner in the bottom-right, sized to its own aspect ratio.
+// `variant` is one of 'made-with-ai' | 'assisted-by-ai' | 'no-ai-used'.
+function drawAiLabelBanner(variant, margin) {
+  return new Promise((resolve) => {
+    const overlay = new Image();
+    overlay.onload = () => {
+      const w = canvas.width / 8;
+      const h = w * (overlay.naturalHeight / overlay.naturalWidth); // preserve banner aspect
+      ctx.drawImage(overlay, canvas.width - w - margin, canvas.height - h - margin, w, h);
+      resolve();
+    };
+    overlay.onerror = () => { console.error('Could not load ai-label banner:', variant); resolve(); };
+    overlay.src = `ai-label/ai-label_banner-${variant}.png`;
+  });
+}
+
 // Label It button.
-labelButton.addEventListener('click', () => {
+labelButton.addEventListener('click', async () => {
 const selectedOption = Array.from(labelOptions).find(option => option.checked).value;
 const fontSize = canvas.width / 30;
 
+// Redraw the clean base image first so labels don't stack on repeated clicks.
+ctx.drawImage(image, 0, 0);
+
 if (selectedOption === 'ai-label') {
-  // Overlay the ai-label.org banner in the bottom-right once it loads.
-  const overlayImage = new Image();
-  const w = canvas.width / 8;
-  const h = w / 2.617;
-  overlayImage.crossOrigin = "anonymous";
-  overlayImage.src = "https://raw.githubusercontent.com/ecogex/ai-label/refs/heads/main/image-pack/ai-label_banner-made-with-ai.svg";
-  overlayImage.onload = () => {
-    ctx.drawImage(image, 0, 0);
-    ctx.drawImage(overlayImage, canvas.width - w - fontSize, canvas.height - h - fontSize, w, h);
-  };
+  await drawAiLabelBanner(aiLabelDropdown.value, fontSize);
 } else {
   // Draw a text label in the bottom-left corner.
   const labels = {
@@ -77,7 +90,6 @@ if (selectedOption === 'ai-label') {
     free: freeInput.value,
   };
   const label = labels[selectedOption];
-  ctx.drawImage(image, 0, 0);
   ctx.font = `${fontSize}px Arial`;
   ctx.fillStyle = 'white';
   ctx.strokeStyle = 'black';
@@ -212,9 +224,10 @@ function decodeAlphaMessageFromCanvas() {
   }
 }
 
-// Load image and draw it to the canvas.
+// Load image and draw it to the canvas. Assigns the module-level `image` so the label
+// handler can redraw the clean base before drawing a label/banner.
 function loadImageFromURL(url) {
-  const image = new Image();
+  image = new Image();
   image.onload = () => {
     // Show canvas and hide placeholder.
     placeholderText.classList.add('d-none');
