@@ -1,4 +1,7 @@
-If you discover a security vulnerability in this project, please follow these steps to responsibly disclose it:
+> [!NOTE]  
+> This repo contains a secret key. The key is self-signed and not on any trust list — there is no authority behind it. This is an intentional limitation of this demo app.
+
+If you discover any other security vulnerability in this project, please follow these steps to responsibly disclose it:
 
 1. **Do not** create a public GitHub issue for the vulnerability.
 2. Follow our [guideline for Responsible Disclosure Policy](https://www.equinor.com/about-us/csirt) to report the issue
