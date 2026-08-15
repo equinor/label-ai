@@ -4,23 +4,30 @@ A tiny app for labeling AI-generated images.
 
 You can download this repository and run it right on your computer, or use [the deployed version](https://equinor.github.io/label-ai/).
 
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/5ac2ad15-4025-4d5b-a687-49963e2b3855" />
+<img width="1120" height="1062" alt="image" src="https://github.com/user-attachments/assets/16eb9201-55d9-419e-b7ee-f9fdb54c2187" />
+
+This is a static app with no server; everything runs on your machine and nothing is communicated with anyone else.
 
 
-## Labeling images
+## Features
+### Creating attributions
 
-The image can be labeled in one or more of two different ways:
+Create an AI Attribution for any piece of work, created with any amount of AI generated content or assitance, using [IBM's attribution format](https://research.ibm.com/blog/AI-attribution-toolkit).
+
+### Labeling images
+
+Images can be labeled in one or both of two different ways:
 
 - A note or symbol can be embedded in the pixels of the image. This is visible to the viewer and cannot be removed except by cropping.
 - Text, such as a prompt, can be embedded in the pixels of the alpha channel of the image (optional). This is not visible to the viewer.
 
-If the uploaded image has [Content Credntials](https://contentcredentials.org/), these are accessible through the **cr** logo on the image.
+### Content credentials
 
+The [Coalition for Content Provenance and Authenticity](https://c2pa.org/), or C2PA, has defined the [Content Credentials](https://contentcredentials.org/) protocol for lableing digital media such as images and video. Label AI allows you to detect and inspect these credentials, if present, or to attach (untrusted demo) credentials to an image.
 
-## Labeling text
+### Labeling text
 
 Text can be tagged by one of several invisible methods, such as inserting a zero-width symbol before each word. The text is still readable.
-
 
 ## See also
 
