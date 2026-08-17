@@ -56,17 +56,13 @@
           </select>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="labelOption" id="chooseModelLabel" value="model">
-          <label class="form-check-label" for="chooseModelLabel">Choose a model</label>
-          <select id="modelDropdown" class="form-select mt-2" disabled>
-            <option value="Microsoft Copilot">Microsoft Copilot</option>
-            <option value="GPT-5">GPT 5+</option>
-            <option value="Claude-4">Claude 4+</option>
-            <option value="Gemini-3">Gemini 3+</option>
-            <option value="DALL-E">DALL-E</option>
-            <option value="Stable Diffusion">Stable Diffusion</option>
-            <option value="Midjourney">Midjourney</option>
-            <option value="Imagen">Imagen</option>
+          <input class="form-check-input" type="radio" name="labelOption" id="useEULabel" value="eu-label">
+          <label class="form-check-label" for="useEULabel">Use EU labels</label>
+          <select id="euLabelDropdown" class="form-select mt-2" disabled>
+            <option value="AI GENERATED_black">AI generated (black)</option>
+            <option value="AI GENERATED_white">AI generated (white)</option>
+            <option value="AI MODIFIED_black">AI modified (black)</option>
+            <option value="AI MODIFIED_white">AI modified (white)</option>
           </select>
         </div>
         <div class="form-check">
@@ -78,7 +74,7 @@
 
       <div class="mb-4 flex-fill">
         <label for="hiddenPrompt" class="form-label">Embed text (optional)</label>
-        <textarea id="hiddenPrompt" class="form-control" rows="7" placeholder="E.g. Model, version, date, prompt..."></textarea>
+        <textarea id="hiddenPrompt" class="form-control" rows="9" placeholder="E.g. Model, version, date, prompt..."></textarea>
       </div>
     </div>
 
