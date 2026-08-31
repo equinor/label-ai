@@ -8,6 +8,8 @@ You can download this repository and run it right on your computer, or use [the 
 
 This is a static app with no server; everything runs on your machine and nothing is communicated with anyone else.
 
+> [!TIP]
+> Interested in watermarking? Check out [`notebooks/Apply_and_detect_SynthID_watermarks.ipynb`](https://github.com/scienxlab/notebooks/blob/main/notebooks/Apply_and_detect_SynthID_watermarks.ipynb) (public) or [`watermark-demo`](https://github.com/equinor/watermark-demo) (Equinor only) for more on that.
 
 ## Features
 ### Creating attributions
@@ -37,10 +39,8 @@ We maintain a few other repos containing learning material related to machine le
 - [`llm-engineering-101`](https://github.com/equinor/llm-engineering-101) for a short workshop aimed at getting developers up to speed.
 - [`ml-pitfalls`](https://github.com/equinor/ml-pitfalls) for more on pitfalls in discriminative machine learning, another series of events.
 - [`ai-upskill`](https://github.com/equinor/ai-upskill) for a repo describing Equinor's company upskill events and materials.
+- [`figgy`](https://github.com/equinor/figgy) is a random collection of interactive slides and games for communicating about AI.
 - [`ai-values`](https://github.com/kwinkunks/ai-values) for a small web app about human values and AI alignment.
-- [`ai-risk-roulette`](https://github.com/equinor/ai-risk-roulette) is a small group-work game, presenting AI use-cases to discuss in groups.
-
-Also see the repo of the [Responsible AI team](https://github.com/equinor/responsible-ai).
 
 ---
 
