@@ -163,7 +163,17 @@ function getExplanationRows(sel) {
 function renderLink(container, text, url) {
   container.innerHTML = '';
   const a = document.createElement('a');
-  a.href = url;
+  // Only allow links on our own origin, so a crafted value can never yield a
+  // javascript: (or other) URL.
+  let parsed = null;
+  try {
+    parsed = new URL(url);
+  } catch (e) {
+    parsed = null;
+  }
+  if (parsed && parsed.origin === new URL(BASE_URL).origin) {
+    a.href = parsed.href;
+  }
   a.textContent = text;
   a.target = '_blank';
   a.rel = 'noopener';
