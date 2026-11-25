@@ -1,5 +1,4 @@
 // Copyright 2026 Matt Hall, Equinor // MIT license
-$('.collapse').collapse();
 const labelButton = document.getElementById('labelButton');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');

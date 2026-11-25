@@ -1,5 +1,4 @@
 // Copyright 2026 Matt Hall, Equinor // MIT license
-$('.collapse').collapse();
 const processButton = document.getElementById('processButton');
 const inputText = document.getElementById('inputText');
 const clearButton = document.getElementById('clearText');
@@ -157,7 +156,17 @@ processButton.addEventListener('click', async () => {
       .replace(/\u2015/g, '<span class="dash">\u2015</span>');
   }
 
-  let visualized = visualizeMarkers(labeled);
+  // Escape user text before inserting markup, so pasted HTML is shown, not run.
+  function escapeHTML(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  let visualized = visualizeMarkers(escapeHTML(labeled));
   if (footnoteAdded) {
     // Colour the appended footnote purple in the visualized output.
     visualized = visualized.replace(FOOTNOTE, '<span class="footnote">' + FOOTNOTE + '</span>');

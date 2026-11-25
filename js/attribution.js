@@ -1,5 +1,4 @@
 // Copyright 2026 Matt Hall, Equinor // MIT license
-$('.collapse').collapse();
 
 // A port of the text-generation logic from IBM's AI Attribution tool
 // (https://aiattribution.github.io), which is shared under an Apache 2.0 license.

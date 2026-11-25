@@ -1,5 +1,4 @@
 // Copyright 2026 Matt Hall, Equinor // MIT license
-$('.collapse').collapse();
 
 const imageFrame = document.getElementById('imageFrame');
 const placeholderText = document.getElementById('placeholderText');

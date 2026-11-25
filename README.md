@@ -29,6 +29,7 @@ The [Coalition for Content Provenance and Authenticity](https://c2pa.org/), or C
 
 Text can be tagged by one of several invisible methods, such as inserting a zero-width symbol before each word. The text is still readable.
 
+
 ## See also
 
 We maintain a few other repos containing learning material related to machine learning and artificial intelligence.
